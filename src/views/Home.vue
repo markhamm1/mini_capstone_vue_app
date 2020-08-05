@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <h1>{{ message }}</h1>
-    <p>Name: <input v-model="newProductName" type="text"></p>
+    <p>Name: <input v-model="newProductName"></p>
     <p>Description: <input v-model="newProductDescription" type="text"></p>
     <p>Price: <input v-model="newProductPrice" type="text"></p>
     <p>Image Url: <input v-model="newProductImageUrl" type="text"></p>
@@ -21,9 +21,16 @@
     <dialog id="product-details">
       <form method="dialog">
         <h1>{{ currentProduct.name }}: info</h1>
-        <p>{{ currentProduct.description }}</p>
-        <p>Price: {{ currentProduct.price }}</p>
+        <p>Name: <input v-model="currentProduct.name"></p>
+        <p>Description: <input v-model="currentProduct.description"></p>
+        <p>Price: <input v-model="currentProduct.price"></p>
+        <p>Image Url: <input v-model="currentProduct.image_url"></p>
         <img v-bind:src="currentProduct.image_url" style="width:600px;">
+        <br>
+        <button v-on:click="updateProduct">Update</button>
+        <br>
+        <button v-on:click="destroyProduct">Delete</button>
+        <br>
         <button>Close</button>
       </form>
     </dialog>
@@ -89,6 +96,31 @@ export default {
       console.log(product);
       this.currentProduct = product;
       document.querySelector("#product-details").showModal();
+    },
+
+    updateProduct: function () {
+      console.log("updating...");
+
+      var params = {
+        name: this.currentProduct.name,
+        description: this.currentProduct.description,
+        price: this.currentProduct.price,
+        image_url: this.currentProduct.image_url,
+      };
+
+      axios.patch("api/products/" + this.currentProduct.id, params).then((response) => {
+        console.log(response.data);
+        this.currentProduct = response.data;
+      });
+    },
+
+    destroyProduct: function () {
+      console.log("deleting");
+      axios.delete("api/products/" + this.currentProduct.id).then((response) => {
+        console.log(response.data);
+        var index = this.products.indexOf(this.currentProduct);
+        this.products.splice(index, 1);
+      });
     },
   },
 };
